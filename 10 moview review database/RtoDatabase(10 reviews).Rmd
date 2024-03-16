@@ -1,0 +1,250 @@
+---
+
+title: "Importing/Exporting of Data"
+author: "Andrey Sumadic"
+date: "2024-03-16"
+output: pdf_document
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+`dbConnect()` is being used to connect the R into MySQL
+
+```
+library(dplyr,dbplyr)
+library(RMariaDB) 
+
+#creating connections
+
+connection <- dbConnect(RMariaDB::MariaDB(), 
+                        dsn="MySQL-connection",
+                        Server = "localhost",
+                        dbname = "cs102_sumadic", 
+                        user = "root", 
+                        password = "") #PWD is the password of your MySQL
+                        
+```
+
+
+### Listing the tables
+
++ Once connected, `dbListTables` to show or list the tables.
+
+
+
+```{r}
+#listing the tables of the sample_db 
+dbListTables(connection)
+```
+
+
+```{r}
+#listing the fields of the authors in the table sample_db
+dbListFields(connection,"activity5")
+```
+
+### Getting data from MySQL
+
++ using the *`dbGetQuery`* is being used to get the data
+
++ SQL commands were `SELECT` and `FROM`
+
+
+```{r}
+act5_dta <- dbGetQuery(connection, "SELECT * FROM cs102_sumadic.activity5")
+# checking for the columns and its content
+glimpse(act5_dta)
+```
+
+```{r}
+#getting all data using SELECT * FROM dbaseName
+empi_data <- dbGetQuery(connection, "SELECT * FROM activity5")
+# checking for the columns and its content
+glimpse(empi_data)
+```
+
+
+```{r}
+#getting all data using SELECT * FROM dbaseName
+empi_data[c(1:10),]
+```
+
+```{r}
+empi_data <- dbGetQuery(connection, "SELECT * FROM activity5")
+tail(empi_data)
+```
+
+```{r}
+#alternative way to display selected fields
+#displays the selected fields of the table
+posts_data <- dbGetQuery(connection, "SELECT title,description FROM activity5")
+posts_data[c(1:2),]
+```
+
+```{r}
+#getting all data using SELECT * FROM dbaseName
+SqlQuery <- "
+  SELECT usernames,rating 
+  FROM activity5
+  "
+
+as_tibble(dbGetQuery(connection,SqlQuery))
+```
+
+### Inserting values into a Table
+
+```{r}
+# insert values into MySQL
+query <- "INSERT INTO activity5 (usernames, reviewer_date, reviewer_content, rating) 
+VALUES ('SnoopyStyle', 
+'30 December 2013', 
+'Carl Fredricksen (Ed Asner) as a young quiet kid idolized explorer Charles Muntz (Christopher Plummer) and his discovery of Paradise Falls. Ellie is much more animated and also a great fan of Muntz. Together they would marry and live their lives together until the day she dies. Now Carl is hounded by a property developer and forced to go to a retirement home. Instead he ties a sea of helium balloons to his home and float away to Paradise Falls. Wilderness Explorer scout Russell who''s trying to get an Assisting the Elderly badge gets dragged along on the adventure.The first part of this movie is a real tear jerker. When Carl and Ellie''s lives flash through the years, all the heart breaks and all the love just jump off the screen. Then there is comedy as the journey to Paradise Falls starts. The movie gets very surreal with dog translators, and a very colorful bird. The villain is a bit too villainy. The story gets too serious at times. But it ends almost as emotionally as it starts. It is one of the best of Pixar.', 
+'9/10')"
+
+
+# Execute the query
+query_result <- dbSendQuery(connection, query)
+
+# clear the result after executing the query
+dbClearResult(query_result)
+```
+
+```{r}
+# insert values into MySQL
+query <- "INSERT INTO activity5 (usernames, reviewer_date, reviewer_content, rating) 
+VALUES ('MrGilgamesh', 
+'2020-02-15', 
+'This film is possibly one of the best animated films of all time as it tells an emotional moving story while being funny. As I said the emotion in this film is full of heart and even though I didn''t cry it will make most people cry. The characters in this are perfect even if it is a small character like Ellie or big character like Carl everybody gets so much development even Charles Muntz the villain of the film is also given development, even more than some superhero films nowadays. Also this film has comedy some Pixar films now just want to make you cry but in the 2000s they had mix of sad and funny moments. So overall this film is as close to perfect as an animated film can get, it is has a mix of emotions it is funny and sad when it needs to be it has so much heart and the characters are perfect. This film in my opinion is the best Pixar film.', 
+'10/10')"
+
+# Execute the query
+query_result <- dbSendQuery(connection, query)
+
+# clear the result after executing the query
+dbClearResult(query_result)
+
+```
+
+```{r}
+# insert values into MySQL
+query <- "INSERT INTO activity5 (usernames, reviewer_date, reviewer_content, rating) 
+VALUES ('TheLittleSongbird', 
+'17 May 2010', 
+'I love Pixar and feel they have been pretty consistent. True I do prefer Toy Story over Cars and Finding Nemo over Ratatouille, but I find their films amazingly animated and thrilling. I thought that after the first two Toy Story films, that Pixar wouldn''t be able to make a film to top them. WALL-E, yes I loved it, came pretty close, but in my opinion Up is Pixar''s masterwork. And why do I say that? Because it is widely imaginative and astonishing in its emotional range.First of all, the animation is stupendous, beautiful backgrounds, beautifully drawn characters and stunning colours. The scenery and sights are just fantastic, down to the colour and visual detail that went into the film. Michael Giacchino''s music is stunning as well, simple yet melodious and sublime. And I do have to concur with the majority about the opening montage; Finding Nemo had some beautiful moments and WALL-E''s haunting isolation moved me close to tears but this opening montage was so poignant and utterly heart-breaking. It is quite simply one of the most beautiful and effective beginnings ever to an animated film.I have heard complaints that the story meanders when the talking dogs are introduced and that they were irritating. Can I respectfully disagree? What I loved about Up was how widely imaginative it was, in short why shouldn''t a dog talk? It''s an animated film, why does it have to COMPLETELY realistic? Elephants don''t fly, look at what Disney did with Dumbo.The story, back on target was well written, thrilling and startling with a sense of adventure with enough action and high-flying escapism for kids and adults. The script had some truly hilarious and surreal moments, while Toy Story had wonderful sophisticated dialogue, the dialogue in Up made me laugh and it made me cry.And finally the characters, I loved them all, grumpy old widower Carl, stowaway Russell, eccentric adventurer Charles Muntz, the big bird and the hilarious Doug. Russell may be a tad annoying at first, but he grows on you. The voice acting is exceptional- Carl is voiced with real demeanour and depth by Ed Asner and Christopher Plummer, the wonderful underrated actor he is, is superb as Charles Muntz. But I do have to give mention to Bob Peterson, he is simply brilliant as Doug, he is really funny when he needs to be and never overdoes it.Overall, this is a wonderful film. There may be controversy over how Beauty and the Beast is no longer the only animated film to be nominated for best picture. Beauty and the Beast has been and always will be my favourite animated film and one of my favourite films of all time (The Lion King is a very close second), but Up is a great film and does deserve an award of some kind. 10/10 Bethany Cox', 
+'10/10')"
+
+# Execute the query
+query_result <- dbSendQuery(connection, query)
+
+# clear the result after executing the query
+dbClearResult(query_result)
+
+```
+
+
+```{r}
+# insert values into MySQL
+query <- "INSERT INTO activity5 (usernames, reviewer_date, reviewer_content, rating) 
+VALUES ('Sleepin_Dragon', 
+'04 February 2023', 
+'A young Carl Fredricksen wanted to find and explore Paradise Falls. Years later, he and Boy Scout Russell embark, transporting his house with thousands of balloons.I don''t think an animation ever had such a huge impact on me, as Up did. I watched it in the cinema with my young nephews, they sat there laughing their heads off and giggling, I sat there in floods of tears.The story is wonderful, and I know it''s an animation, but how nice to see an elderly gentleman as the lead. Carl is a fascinating character, he''s a little quirky, he''s funny, but he''s heartbroken.The animation is glorious, it holds up incredibly well, and looks better than many that followed, it also sounds marvellous. It''s wonderfully bright and vivid, it will appeal to viewers young and old.Up never gets tired, it''s an outstanding, funny, moving and heart-warming movie.10/10.', 
+'10/10')"
+
+# Execute the query
+query_result <- dbSendQuery(connection, query)
+
+# clear the result after executing the query
+dbClearResult(query_result)
+
+```
+
+```{r}
+# insert values into MySQL
+query <- "INSERT INTO activity5 (usernames, reviewer_date, reviewer_content, rating) 
+VALUES ('bevo-13678', 
+'09 September 2021', 
+'If you asked Rick Astley for a copy of this movie he wouldn''t because he stated \"I''m never gonna give you up\" but then he would be letting you down. Therein lies the Rick Astley Paradox.', 
+'10/10')"
+
+# Execute the query
+query_result <- dbSendQuery(connection, query)
+
+# clear the result after executing the query
+dbClearResult(query_result)
+
+```
+
+```{r}
+# insert values into MySQL
+query <- "INSERT INTO activity5 (usernames, reviewer_date, reviewer_content, rating) 
+VALUES ('Erik_Stone', 
+'03 August 2021', 
+'It will put you through every emotion that a human can experience, that is, if you are an adult and not a psychopath.', 
+'10/10')"
+
+# Execute the query
+query_result <- dbSendQuery(connection, query)
+
+# clear the result after executing the query
+dbClearResult(query_result)
+
+```
+
+```{r}
+# insert values into MySQL
+query <- "INSERT INTO activity5 (usernames, reviewer_date, reviewer_content, rating) 
+VALUES ('ccthemovieman-1', 
+'22 November 2009', 
+'This is another film in which it really helps to know in advance what it is, or more specifically, what it isn''t. Then, you go from there. I enjoyed the animated film very much but, some of that was due to the fact a friend clued me in first, saying \"this isn''t really a comedy or a film for little kids. Don''t expect a ton of laughs.\" So, instead of seeking laughs (although I still got them here and there), I just enjoyed the adventure story and marveled at the amazing artwork. Seen on Blu-Ray, this is yet another example in which you shake your head and wonder, \"How does the artwork get any better than this?\" Then, about six months from now, another will come along and I''ll say the same thing. Overall movies may not be better today than \"in the old days,\" but there is no dispute there are two areas in which films keep getting better and better: special-effects and animation. This is another example of that.The colors and the detail in here are almost beyond description. The artwork ranges from bold to subdued, but always stunning. I lost track how many times I wanted to just pause and admire the picture for a few minutes. From super-sharp closeups of the old man''s face to lush jungle scenery, this high-definition disc is worth every penny/Back to the story, I found it a combination adventure-fantasy-comedy-suspense-sentimental story, about in that order, too. Generally-speaking, I would think adults would like this more than kids, but I may be wrong. Everyone - regardless of age - will have their jaw drop more than once viewing the incredible-looking scenes. It''s really a feast for the eyes. Finally, if you like extras, there are tons of them in the four-disc DVD set.', 
+'9/10')"
+
+# Execute the query
+query_result <- dbSendQuery(connection, query)
+
+# clear the result after executing the query
+dbClearResult(query_result)
+
+
+```
+```{r}
+# insert values into MySQL
+query <- "INSERT INTO activity5 (usernames, reviewer_date, reviewer_content, rating) 
+VALUES ('x-xbecky_nashx-x', 
+'07 August 2010', 
+'Honestly, I found the DVD of this film in my house and decided to give it a watch as I had nothing better to do. Truth is I really should have made the time before.Although I enjoy all the other Disney/pixar movies, I am at that teenage age where I mainly seek Violence, sex and gore. Thankfully my teenage boredom did me a big favour in helping what this fantastic masterpiece. This film was so fantastically deep, meaningful and moving beyond relief, as soon as I switched it off I rang my grandparents to tell them I love them.It should be made necessary that everyone everywhere should see this film and I think the world would be a much better place - it really is that good.100/10', 
+'10/10')"
+
+# Execute the query
+query_result <- dbSendQuery(connection, query)
+
+# clear the result after executing the query
+dbClearResult(query_result)
+
+```
+
+```{r}
+# insert values into MySQL
+query <- "INSERT INTO activity5 (usernames, reviewer_date, reviewer_content, rating) 
+VALUES ('auuwws', 
+'18 January 2021', 
+'One of the best Pixar movies, the beginning of the movie makes anyone cry even if they turn them from your stone, and do not cry from any movie. The beginning of the movie and the movie stars were excellent. I''m really sympathetic to Carl. Rarely is a cartoon character well written in a target for children. The story of the movie was excellent, the message of the movie was, and I feel that the movie made me feel the magic of the Disney films that I missed a lot, the evil of the film was disappointing and was not convincing unlike the rest of the bad guys at Pixar and Disney, my rating for the movie is 9.2', 
+'10/10')"
+
+# Execute the query
+query_result <- dbSendQuery(connection, query)
+
+# clear the result after executing the query
+dbClearResult(query_result)
+
+```
+
+```{r}
+#checking if the value was inserted into a table
+tail(empi_data)
+```
+```{r}
+#disconnect from dbase
+dbDisconnect(connection)
+```
